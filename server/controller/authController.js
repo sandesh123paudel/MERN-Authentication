@@ -5,6 +5,7 @@ import transporter from "../config/nodemailer.js";
 import {
   EMAIL_VERIFY_TEMPLATE,
   PASSWORD_RESET_TEMPLATE,
+  WELCOME_MESSAGE_TEMPLATE,
 } from "../config/emailTemplates.js";
 
 //Generate Token
@@ -46,12 +47,12 @@ export const register = async (req, res) => {
     //Sending Welcome Email
     const mailOptions = {
       from: `"MERN-AUTH" <${process.env.EMAIL_ADDRESS}>`,
-
-      to: email,
-      subject: "WelCome to MERN-Auth",
-      text: `Welcome to MERN-Auth Project.Your account has been craeted successfully with email id: ${email}`,
+      to: user.email,
+      subject: "Welcome to MERN-Auth",
+      html: WELCOME_MESSAGE_TEMPLATE.replace("{{email}}", user.email)
+        .replace("{{name}}", user.name)
+        .replace("{{current_year}}", new Date().getFullYear()),
     };
-
     await transporter.sendMail(mailOptions);
 
     res.json({ success: true, message: "User registered successfully" });
