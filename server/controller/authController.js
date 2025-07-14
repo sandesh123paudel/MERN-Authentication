@@ -106,7 +106,7 @@ export const logout = async (req, res) => {
 export const sendVerifyOtp = async (req, res) => {
   try {
     const { userId } = req.body;
-    const user = await userModel.findById({ userId });
+    const user = await userModel.findById(userId);
 
     if (user.isVerified) {
       return res.json({ success: false, message: "Account Already Verified" });
@@ -120,7 +120,7 @@ export const sendVerifyOtp = async (req, res) => {
     const mailOptions = {
       from: `"VERIFY-ACCOUNT" <${process.env.EMAIL_ADDRESS}>`,
 
-      to: email,
+      to: user.email,
       subject: "Account Verification OTP",
       text: `Your OTP is: ${otp}. Vreify your account with this OTP`,
     };
@@ -144,7 +144,7 @@ export const verifyEmail = async (req, res) => {
   }
 
   try {
-    const user = await userModel.findById({ userId });
+    const user = await userModel.findById( userId );
 
     if (!user) {
       return res.json({ success: false, message: "User not found " });
