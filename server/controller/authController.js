@@ -42,6 +42,7 @@ export const register = async (req, res) => {
     //Sending Welcome Email
     const mailOptions = {
       from: `"MERN-AUTH" <${process.env.EMAIL_ADDRESS}>`,
+
       to: email,
       subject: "WelCome to MERN-Auth",
       text: `Welcome to MERN-Auth Project.Your account has been craeted successfully with email id: ${email}`,
@@ -96,6 +97,72 @@ export const logout = async (req, res) => {
     });
 
     res.json({ success: true, message: "Logged Out successfully" });
+  } catch (error) {
+    return res.json({ success: false, message: error.message });
+  }
+};
+
+//For Send Verify OTP
+export const sendVerifyOtp = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const user = await userModel.findById({ userId });
+
+    if (user.isVerified) {
+      return res.json({ success: false, message: "Account Already Verified" });
+    }
+
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    user.verifyOtp = otp;
+    user.verifyOtpExpireAt = Date.now() + 24 * 60 * 60 * 1000;
+    await user.save();
+
+    const mailOptions = {
+      from: `"VERIFY-ACCOUNT" <${process.env.EMAIL_ADDRESS}>`,
+
+      to: email,
+      subject: "Account Verification OTP",
+      text: `Your OTP is: ${otp}. Vreify your account with this OTP`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    return res.json({
+      success: true,
+      message: "Verification Code has been successfully sent to the email",
+    });
+  } catch (error) {
+    return res.json({ success: false, message: error.message });
+  }
+};
+
+//For  Verify Email
+
+export const verifyEmail = async (req, res) => {
+  const { userId, otp } = req.body;
+  if (!userId || !otp) {
+    return res.json({ success: false, message: "Missing details" });
+  }
+
+  try {
+    const user = await userModel.findById({ userId });
+
+    if (!user) {
+      return res.json({ success: false, message: "User not found " });
+    }
+
+    if (user.verifyOtp === "" || user.verifyOtp !== otp) {
+      return res.json({ success: false, message: "Invalid OTP" });
+    }
+
+    if (user.verifyOtpExpireAt < Date.now()) {
+      return res.json({ success: false, message: "OTP Expired" });
+    }
+
+    user.isVerified = true;
+    user.verifyOtp = "";
+    user.verifyOtpExpireAt = 0;
+    await user.save();
+    return res.json({ success: true, message: "Email Verified Successfully" });
   } catch (error) {
     return res.json({ success: false, message: error.message });
   }
