@@ -2,6 +2,10 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
 import transporter from "../config/nodemailer.js";
+import {
+  EMAIL_VERIFY_TEMPLATE,
+  PASSWORD_RESET_TEMPLATE,
+} from "../config/emailTemplates.js";
 
 //Generate Token
 const generateToken = (userId) => {
@@ -105,7 +109,7 @@ export const logout = async (req, res) => {
 //For Send Verify OTP
 export const sendVerifyOtp = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const userId = req.userId;
     const user = await userModel.findById(userId);
 
     if (user.isVerified) {
@@ -122,7 +126,11 @@ export const sendVerifyOtp = async (req, res) => {
 
       to: user.email,
       subject: "Account Verification OTP",
-      text: `Your OTP is: ${otp}. Vreify your account with this OTP`,
+      // text: `Your OTP is: ${otp}. Vreify your account with this OTP`,
+      html: EMAIL_VERIFY_TEMPLATE.replace("{{otp}}", otp).replace(
+        "{{email}}",
+        user.email
+      ),
     };
 
     await transporter.sendMail(mailOptions);
@@ -137,7 +145,8 @@ export const sendVerifyOtp = async (req, res) => {
 
 //For  Verify Email
 export const verifyEmail = async (req, res) => {
-  const { userId, otp } = req.body;
+  const { otp } = req.body;
+  const userId = req.userId;
   if (!userId || !otp) {
     return res.json({ success: false, message: "Missing details" });
   }
@@ -201,7 +210,11 @@ export const sendResetOtp = async (req, res) => {
 
       to: user.email,
       subject: "Password Reset OTP",
-      text: `Your OTP is: ${otp}. Reset your password with this OTP`,
+      // text: `Your OTP is: ${otp}. Reset your password with this OTP`,
+      html: PASSWORD_RESET_TEMPLATE.replace("{{otp}}", otp).replace(
+        "{{email}}",
+        user.email
+      ),
     };
 
     await transporter.sendMail(mailOptions);
