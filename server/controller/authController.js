@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
+import transporter from "../config/nodemailer.js";
 
 //Generate Token
 const generateToken = (userId) => {
@@ -37,6 +38,16 @@ export const register = async (req, res) => {
     await user.save();
     const token = generateToken(user._id);
     setTokenCookie(res, token);
+
+    //Sending Welcome Email
+    const mailOptions = {
+      from: `"MERN-AUTH" <${process.env.EMAIL_ADDRESS}>`,
+      to: email,
+      subject: "WelCome to MERN-Auth",
+      text: `Welcome to MERN-Auth Project.Your account has been craeted successfully with email id: ${email}`,
+    };
+
+    await transporter.sendMail(mailOptions);
 
     res.json({ success: true, message: "User registered successfully" });
   } catch (error) {
