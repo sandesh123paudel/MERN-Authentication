@@ -1,11 +1,13 @@
 import React from "react";
 import { assets } from "../assets/assets";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const ResetPassword = () => {
+  const navigate = useNavigate();
   return (
     <div className="flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400">
       <img
+        onClick={() => navigate("/")}
         src={assets.logo}
         alt=""
         className="w-28 absolute left-5 sm:left-20 top-5 sm:w-32 cursor-pointer"
@@ -40,15 +42,13 @@ const ResetPassword = () => {
             Send Reset Link
           </button>
 
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
-              Remembered your password?{" "}
-              <Link
-                to="/login"
-                className="text-blue-600 hover:underline cursor-pointer"
-              >
-                Back to Login
-              </Link>
+          <div className="mt-4 text-center flex justify-center items-center gap-2">
+            <p className="text-sm text-gray-600">Remembered your password? </p>
+            <p
+              onClick={() => navigate("/login")}
+              className="text-blue-600 hover:underline cursor-pointer"
+            >
+              Back to Login
             </p>
           </div>
         </form>

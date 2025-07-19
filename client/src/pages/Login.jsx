@@ -1,14 +1,25 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useState } from "react";
 import { assets } from "../assets/assets";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { AppContent } from "../context/AppContext";
 
 const Login = () => {
-  const [state, setState] = useState("Login"); // Default state set to Login
+  const navigate = useNavigate( );
+  const { backendUrl, setIsLoggedIn } = useContext(AppContent);
+
+
+  const [state, setState] = useState("Login"); 
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+
 
   return (
     <div className="flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400">
       <img
+        onClick={() => navigate("/")}
         src={assets.logo}
         alt=""
         className="w-28 absolute left-5 sm:left-20 top-5 sm:w-32 cursor-pointer"
@@ -23,7 +34,7 @@ const Login = () => {
             : "Login to your account"}
         </p>
 
-        <form action="">
+        <form onSubmit={}>
           {state === "Sign Up" && (
             <div className="mt-4">
               <label
@@ -35,6 +46,8 @@ const Login = () => {
               <input
                 type="text"
                 id="fullName"
+                onChange={(e) => setName(e.target.value)}
+                value={name}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 required
               />
@@ -51,6 +64,8 @@ const Login = () => {
             <input
               type="email"
               id="email"
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               required
             />
@@ -66,6 +81,8 @@ const Login = () => {
             <input
               type="password"
               id="password"
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               required
             />
@@ -73,12 +90,12 @@ const Login = () => {
 
           {state === "Login" && (
             <div className="flex justify-end mt-4">
-              <Link
-                to="/reset-password"
-                className="block text-sm font-medium text-gray-700 hover:text-blue-600"
+              <p
+                onClick={() => navigate("/reset-password")}
+                className="block text-sm font-medium text-gray-700 hover:text-blue-600 cursor-pointer"
               >
                 Forgot Password?
-              </Link>
+              </p>
             </div>
           )}
 
