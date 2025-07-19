@@ -27,6 +27,7 @@ const Login = () => {
         });
         if (data.success) {
           setIsLoggedIn(true);
+          toast.success(data.message);
           getUserData();
           navigate("/");
         } else {
@@ -40,6 +41,7 @@ const Login = () => {
 
         if (data.success) {
           setIsLoggedIn(true);
+          toast.success(data.message);
           getUserData();
           navigate("/");
         } else {
