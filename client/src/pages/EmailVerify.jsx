@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from "react";
 import { assets } from "../assets/assets";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { AppContent } from "../context/AppContext";
 import axios from "axios";
@@ -8,9 +8,14 @@ import axios from "axios";
 const EmailVerify = () => {
   const navigate = useNavigate();
   axios.defaults.withCredentials = true;
+
+  const location = useLocation();
+  const email = location.state?.email;
+
   const { backendUrl, isLoggedIn, userData, getUserData } =
     useContext(AppContent);
   const inputRefs = React.useRef([]);
+
   const handleInput = (e, index) => {
     if (e.target.value.length > 0 && index < inputRefs.current.length - 1) {
       inputRefs.current[index + 1].focus();
@@ -41,7 +46,7 @@ const EmailVerify = () => {
 
       const { data } = await axios.post(
         backendUrl + "/api/auth/verify-account",
-        { otp }
+        { otp, email }
       );
 
       if (data.success) {
@@ -56,9 +61,14 @@ const EmailVerify = () => {
     }
   };
   useEffect(() => {
-    isLoggedIn && userData && userData.isVerified && navigate("/");
-  }, [isLoggedIn, userData, navigate]);
-
+    if (isLoggedIn && userData?.isVerified) {
+      navigate("/");
+    } else if (isLoggedIn && !userData?.isVerified) {
+      navigate("/email-verify", { state: { email: userData?.email } });
+    } else if (!email) {
+      navigate("/login");
+    }
+  }, [isLoggedIn, userData, email, navigate]);
   return (
     <div className="flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400">
       <img

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { useState } from "react";
 import { assets } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,10 @@ import { toast } from "react-toastify";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { backendUrl, setIsLoggedIn, getUserData } = useContext(AppContent);
+  axios.defaults.withCredentials = true;
+
+  const { isLoggedIn, backendUrl, setIsLoggedIn, getUserData } =
+    useContext(AppContent);
 
   const [state, setState] = useState("Login");
   const [name, setName] = useState("");
@@ -26,12 +29,20 @@ const Login = () => {
           password,
         });
         if (data.success) {
-          setIsLoggedIn(true);
-          toast.success(data.message);
-          getUserData();
-          navigate("/");
-        } else {
-          toast.error(data.message);
+          //Verifying the email after registration
+          const verifyData = await axios.post(
+            backendUrl + "/api/auth/send-verify-email",
+            {},
+            { withCredentials: true }
+          );
+          if (verifyData.data.success) {
+            toast.success("Registration successful! Please verify your email.");
+            navigate("/email-verify", { state: { email } }); // ⬅️ Send email to verify page
+          } else if (verifyData.data.success === false) {
+            toast.error("Failed to send verification email.");
+          } else {
+            toast.error(data.message);
+          }
         }
       } else {
         const { data } = await axios.post(backendUrl + "/api/auth/login", {
@@ -52,6 +63,10 @@ const Login = () => {
       toast.error(error.message);
     }
   };
+
+  useEffect(() => {
+    isLoggedIn && navigate("/");
+  }, [isLoggedIn, navigate]);
 
   return (
     <div className="flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400">
